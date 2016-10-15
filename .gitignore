@@ -1,0 +1,6 @@
+.obj
+*.xml
+*.json
+*.VC.db
+*.VC.opendb
+x64/
