@@ -1,3 +1,5 @@
+#pragma once
+
 #include <hl7parser/buffer.h>
 #include <hl7parser/defs.h>
 #include <hl7parser/element.h>
