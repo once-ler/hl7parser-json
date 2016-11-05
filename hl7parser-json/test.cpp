@@ -1,4 +1,5 @@
 #include "hl7parser-json.hpp"
+#include <regex>
 
 using namespace hl7parserJson;
 using namespace std;
@@ -15,12 +16,30 @@ static char MESSAGE_DATA[] =
 "NTE|1||SIN CARGO\r"
 "NTE|2||IVA: SI\r";
 
-int main(int argc, char *argv[]) {
+string getSampleFile() {
+  regex newline("\n");
+  ifstream infile{ "data/adt_a08.txt" };
+  string file_contents{ istreambuf_iterator<char>(infile), istreambuf_iterator<char>() };
+  return regex_replace(file_contents, newline, "\r");
+}
+
+void testParse(string input) {
   hl7parser<Format::json> parser;
   try {
-    string result = parser.parse(MESSAGE_DATA);
+    string result = parser.parse(input);
     cout << result << endl;;
   } catch (exception& e) {
     cout << e.what() << endl;
   }
+}
+
+int testFile() {
+  auto a08 = getSampleFile();
+  testParse(a08);
+  return 0;
+}
+
+int main(int argc, char *argv[]) {  
+  testFile();
+  testParse(MESSAGE_DATA);
 }
