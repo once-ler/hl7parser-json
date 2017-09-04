@@ -39,7 +39,18 @@ int testFile() {
   return 0;
 }
 
-int main(int argc, char *argv[]) {  
+void testHeaderOnly(string input) {
+  hl7parser<Format::json> parser;
+  try {
+    string result = parser.parseHeader(input);
+    cout << result << endl;;
+  } catch (exception& e) {
+    cout << e.what() << endl;
+  }
+}
+
+int main(int argc, char *argv[]) {
+  testHeaderOnly(MESSAGE_DATA);
   testFile();
-  testParse(MESSAGE_DATA);
+  testParse(MESSAGE_DATA);  
 }

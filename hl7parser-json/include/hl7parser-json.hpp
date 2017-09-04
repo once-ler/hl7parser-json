@@ -23,7 +23,12 @@ namespace hl7parserJson{
   template<Format format>
   class hl7parser {
   public:
-    string parse(const string input) {
+    string parseHeader(const string& input) {
+      return parse(input, true);
+    }
+
+    string parse(const string& input, const bool _headerOnly = false) {
+      headerOnly = _headerOnly;
       string resp;
       int             rc = 0;
       HL7_Settings    settings;
@@ -67,7 +72,9 @@ namespace hl7parserJson{
     }
   private:
     stringstream ostr;
-
+    bool headerOnly;
+    int segmentIndex = -1;
+    
     void encode(std::string& data) {
       std::string buffer;
       buffer.reserve(data.size());
@@ -102,8 +109,15 @@ namespace hl7parserJson{
         vector<unsigned char> characters_buffer;
         size_t              characters_length;
 
+        if (headerOnly && segmentIndex > 0)
+          return;
+
         do {
           type_name = element_type_name(element_type);
+          
+          if (element_type == HL7_ELEMENT_SEGMENT) {
+            ++segmentIndex;
+          }
 
           ostr << "<" << type_name << ">";
 
