@@ -100,7 +100,7 @@ namespace hl7parserJson{
         "Segment"
       };
 
-      return (element_type < HL7_ELEMENT_TYPE_COUNT ? ELEMENT_TYPE_NAME[(int)element_type] : "Unknown");
+      return (element_type < HL7_ELEMENT_TYPE_COUNT ? ELEMENT_TYPE_NAME[(int)element_type] : static_cast<char*>("Unknown"));
     }
 
     void print_node(HL7_Node *node, HL7_Element_Type element_type) {
