@@ -66,8 +66,11 @@ size_t hl7_sprint( char *output_buffer, const size_t output_len,
         {
             // Find out if we can escape this character using the
             // normal C escape characters.
-            // escaped_pos  = ( ( c != '\0' ) ? strchr( ESCAPE_KEY, c ) : 0 );
+            #ifndef _CRT_SECURE_NO_WARNINGS
+            escaped_pos  = ( ( c != '\0' ) ? strchr( ESCAPE_KEY, c ) : 0 );
+            #else
             escaped_pos = const_cast<char*>((c != '\0') ? strchr(ESCAPE_KEY, c) : 0);
+            #endif
             escaped_char = escaped_buffer;
             // C escape:                    "\\<c>"   (2 characters)
             // C escape (linefeed):         "\\n[\n]" (3 characters)

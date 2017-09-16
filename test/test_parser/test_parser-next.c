@@ -21,6 +21,7 @@ Headers
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -28,6 +29,8 @@ Headers
 
 using namespace std;
 stringstream ostr;
+
+#endif
 
 /* ------------------------------------------------------------------------
 Macros
@@ -120,6 +123,8 @@ int main(void) {
   return rc;
 }
 
+#ifdef _CRT_SECURE_NO_WARNINGS
+
 void encode(std::string& data) {
   std::string buffer;
   buffer.reserve(data.size());
@@ -155,6 +160,23 @@ static void print_message(HL7_Message *message) {
   }
 }
 
+#else
+
+/* ------------------------------------------------------------------------ */
+static void print_message( HL7_Message *message )
+{
+    if ( message != 0 )
+    {
+        printf( "<Message>\n" );
+
+        print_node( message->head, HL7_ELEMENT_SEGMENT, TAB_LENGTH );
+
+        printf( "</Message>\n" );
+    }
+}
+
+#endif
+
 /* ------------------------------------------------------------------------ */
 static void print_node(HL7_Node *node, HL7_Element_Type element_type, const size_t tab_length) {
   static const char   ELEMENT_TAB[TAB_LENGTH + 1] = "  ";
@@ -172,7 +194,10 @@ static void print_node(HL7_Node *node, HL7_Element_Type element_type, const size
       type_name = element_type_name(element_type);
 
       printf("%s<%s>\n", tab_buffer, type_name);
+      
+      #ifdef _CRT_SECURE_NO_WARNINGS
       ostr << tab_buffer << "<" << type_name << ">";
+      #endif
 
       if (node->element.length > 0) {
         characters_length = node->element.length;
@@ -188,11 +213,18 @@ static void print_node(HL7_Node *node, HL7_Element_Type element_type, const size
           tab_buffer, ELEMENT_TAB, characters_buffer,
           (unsigned)node->element.length);
 
+        #ifdef _CRT_SECURE_NO_WARNINGS
         auto str = string(characters_buffer);
-        encode(str);
+        encode(str);        
         ostr << str;
+        #endif
+
       } else if (node->children == 0) {
+
+        #ifdef _CRT_SECURE_NO_WARNINGS
         ostr << "";
+        #endif
+
       }
 
       if (node->children != 0) {
@@ -200,7 +232,10 @@ static void print_node(HL7_Node *node, HL7_Element_Type element_type, const size
       }
 
       printf("%s</%s>\n", tab_buffer, type_name);
+      
+      #ifdef _CRT_SECURE_NO_WARNINGS
       ostr << "</" << type_name << ">\n";
+      #endif
 
       node = node->sibling;
 
