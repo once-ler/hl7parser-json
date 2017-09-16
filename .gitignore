@@ -4,3 +4,5 @@
 *.VC.db
 *.VC.opendb
 x64/
+bin/
+lib/
