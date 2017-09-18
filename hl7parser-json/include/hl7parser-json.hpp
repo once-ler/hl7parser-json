@@ -68,7 +68,7 @@ namespace hl7parserJson{
 
       if (rc == 0) return resp;
 
-      throw exception("Error processing message");
+      throw "Error processing message";
     }
   private:
     stringstream ostr;
