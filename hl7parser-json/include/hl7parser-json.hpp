@@ -43,9 +43,10 @@ namespace hl7parserJson{
       hl7_settings_init(&settings);
 
       /* Initialize the buffer excluding the null terminator. */
-      hl7_buffer_init(&input_buffer, const_cast<char*>(input.c_str()), message_length);
+      auto cstr = const_cast<char*>(input.c_str());      
+      hl7_buffer_init(&input_buffer, cstr, message_length);
       hl7_buffer_move_wr_ptr(&input_buffer, message_length);
-
+      
       /* Initialize the message */
       hl7_allocator_init(&allocator, malloc, free);
       hl7_message_init(&message, &settings, &allocator);
@@ -54,9 +55,9 @@ namespace hl7parserJson{
       hl7_parser_init(&parser, &settings);
 
       rc = hl7_parser_read(&parser, &message, &input_buffer);
-
+      
       if (rc == 0) {
-        resp = print_message(&message);
+        resp = print_message(&message);        
       }
 
       /* Clean up */
@@ -93,20 +94,19 @@ namespace hl7parserJson{
 
     char *element_type_name(const HL7_Element_Type element_type) {
       static char *ELEMENT_TYPE_NAME[HL7_ELEMENT_TYPE_COUNT] = {
-        "Subcomponent",
-        "Component",
-        "Repetition",
-        "Field",
-        "Segment"
+        const_cast<char*>("Subcomponent"),
+        const_cast<char*>("Component"),
+        const_cast<char*>("Repetition"),
+        const_cast<char*>("Field"),
+        const_cast<char*>("Segment")
       };
 
-      return (element_type < HL7_ELEMENT_TYPE_COUNT ? ELEMENT_TYPE_NAME[(int)element_type] : static_cast<char*>("Unknown"));
+      return (element_type < HL7_ELEMENT_TYPE_COUNT ? ELEMENT_TYPE_NAME[(int)element_type] : const_cast<char*>("Unknown"));
     }
 
     void print_node(HL7_Node *node, HL7_Element_Type element_type) {
       if (node != 0) {
         const char          *type_name;
-        vector<unsigned char> characters_buffer;
         size_t              characters_length;
 
         if (headerOnly && segmentIndex > 0)
@@ -118,23 +118,18 @@ namespace hl7parserJson{
           if (element_type == HL7_ELEMENT_SEGMENT) {
             ++segmentIndex;
           }
-
+          
           ostr << "<" << type_name << ">";
 
           if (node->element.length > 0) {
             characters_length = node->element.length;
 
-            if (characters_length > sizeof(characters_buffer) - 1) {
-              characters_length = sizeof(characters_buffer) - 1;
-            }
-
-            characters_buffer.resize(characters_length + 1);
-            memcpy(&characters_buffer[0], node->element.value, characters_length);
-            characters_buffer[characters_length] = '\0';
-
-            auto str = string(characters_buffer.begin(), characters_buffer.end() - 1);
+            vector<char> tmp(node->element.value, node->element.value + characters_length + 1);
+            auto str = string(tmp.begin(), tmp.end() - 1);
+            
             encode(str);
-            ostr << str;
+            
+            ostr << str;            
           } else if (node->children == 0) {
             ostr << "";
           }
@@ -158,6 +153,7 @@ namespace hl7parserJson{
         ostr << "</Message>\n";
 
         string raw = ostr.str();
+        
         if (format == Format::json) return xml2json(raw.c_str());
         if (format == Format::xml) return raw;
       }
