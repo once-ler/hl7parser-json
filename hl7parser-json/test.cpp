@@ -49,6 +49,10 @@ void testHeaderOnly(string input) {
   }
 }
 
+void testLibParse() {
+
+}
+
 int main(int argc, char *argv[]) {
   testHeaderOnly(MESSAGE_DATA);
   testFile();
