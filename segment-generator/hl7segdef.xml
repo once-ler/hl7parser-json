@@ -112,13 +112,14 @@
         <subcomponent   name="observation_identifier_text"              index="2.0.1"   length="50"/>
         <subcomponent   name="observation_identifier_coding_system"     index="2.0.2"   length="30"/>
         <field          name="observation_sub_id"                       index="3"       length="20"/>
-        <field          name="observation_value"                        index="4"       length="65536"/>
+        <field          name="observation_value_text"                   index="4"       length="65536"/>
+        <component      name="observation_value"                        index="4.0"     length="60"/>
         <component      name="units_id"                                 index="5.0.0"   length="6"/>
         <component      name="units_text"                               index="5.0.1"   length="50"/>
         <component      name="units_coding_system"                      index="5.0.2"   length="30"/>
         <field          name="reference_range"                          index="6"       length="60"/>
         <component      name="abnormal_flags_id"                        index="7.0"     length="20"/>
-        <field          name="probability"                              index="8"       length="4" data_type="float"/>
+        <field          name="probability"                              index="8"       length="32"/>
         <component      name="nature_of_abnormal_test_id"               index="9.0"     length="20"/>
         <component      name="observation_result_status"                index="10.0"    length="20"/>
         <field          name="date_last_obs_normal_values"              index="11"      length="14" data_type="date" />

@@ -145,6 +145,7 @@
     <ClInclude Include="include\hl7parser\seg_msa.h" />
     <ClInclude Include="include\hl7parser\seg_msh.h" />
     <ClInclude Include="include\hl7parser\seg_nte.h" />
+    <ClInclude Include="include\hl7parser\seg_obx.h" />
     <ClInclude Include="include\hl7parser\seg_pid.h" />
     <ClInclude Include="include\hl7parser\seg_pr1.h" />
     <ClInclude Include="include\hl7parser\seg_prd.h" />
@@ -184,6 +185,7 @@
     <ClCompile Include="src\seg_msa.c" />
     <ClCompile Include="src\seg_msh.c" />
     <ClCompile Include="src\seg_nte.c" />
+    <ClCompile Include="src\seg_obx.c" />
     <ClCompile Include="src\seg_pid.c" />
     <ClCompile Include="src\seg_pr1.c" />
     <ClCompile Include="src\seg_prd.c" />

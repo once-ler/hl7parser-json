@@ -4,3 +4,4 @@
 *.VC.db
 *.VC.opendb
 x64/
+internal/

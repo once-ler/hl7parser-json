@@ -1,6 +1,9 @@
 #include "hl7parser-json.hpp"
 #include <regex>
 
+#include <hl7parser/seg_pid.h>
+#include <hl7parser/seg_obx.h>
+
 using namespace hl7parserJson;
 using namespace std;
 
@@ -16,9 +19,13 @@ static char MESSAGE_DATA[] =
 "NTE|1||SIN CARGO\r"
 "NTE|2||IVA: SI\r";
 
-string getSampleFile() {
+string getSampleFile(const string& filename = "data/adt_a08.txt") {
   regex newline("\n");
-  ifstream infile{ "data/adt_a08.txt" };
+  ifstream infile{ filename };
+  if (infile.fail()) {
+    cerr << strerror(errno) << endl;
+    return "";
+  }
   string file_contents{ istreambuf_iterator<char>(infile), istreambuf_iterator<char>() };
   return regex_replace(file_contents, newline, "\r");
 }
@@ -49,11 +56,74 @@ void testHeaderOnly(string input) {
   }
 }
 
-void testLibParse() {
+int testLibParse() {
+  int             rc = 0;
+  HL7_Settings    settings;
+  HL7_Buffer      input_buffer;
+  HL7_Buffer      output_buffer;
+  HL7_Allocator   allocator;
+  HL7_Message     message;
+  HL7_Parser      parser;
+  size_t          message_length = sizeof(MESSAGE_DATA) - 1;
 
+  auto mdm = getSampleFile("internal/realmdm.txt");
+  message_length = mdm.size();
+
+  hl7_settings_init(&settings);
+
+  /* Initialize the buffer excluding the null terminator. */
+  hl7_buffer_init(&input_buffer, const_cast<char*>(mdm.c_str()), message_length);
+  hl7_buffer_move_wr_ptr(&input_buffer, message_length);
+
+  /* Initialize the message */
+  hl7_allocator_init(&allocator, malloc, free);
+  hl7_message_init(&message, &settings, &allocator);
+
+  /* Initialize the parser. */
+  hl7_parser_init(&parser, &settings);
+
+  rc = hl7_parser_read(&parser, &message, &input_buffer);
+  if (rc == 0) {
+    HL7_Segment segment;
+    HL7_Element* el;
+    int sequence = 0;
+    
+    rc = hl7_message_segment(&message, &segment, "PID", 0);
+    if (rc == 0) {
+      // Patient
+      el = hl7_pid_patient_id(&segment);
+      string m(el->value, el->length);
+      cout << m << endl;
+    }
+
+    rc = hl7_message_segment(&message, &segment, "OBX", 1);
+    if (rc == 0) {
+      // Observation
+      el = hl7_obx_observation_value_text(&segment);
+      cout << el->length << endl;
+      el = hl7_obx_observation_value(&segment);
+      auto tk = el->attr;
+      string m(el->value, el->length);
+      cout << m << endl;
+    }
+  }
+
+  /* Cleanup */
+  hl7_buffer_fini(&output_buffer);
+  
+  hl7_parser_fini(&parser);
+
+  hl7_message_fini(&message);
+  hl7_allocator_fini(&allocator);
+
+  hl7_buffer_fini(&input_buffer);
+  hl7_settings_fini(&settings);
+
+  return rc;
 }
 
 int main(int argc, char *argv[]) {
+  return testLibParse();
   testHeaderOnly(MESSAGE_DATA);
   testFile();
   testParse(MESSAGE_DATA);  
