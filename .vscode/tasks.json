@@ -1,0 +1,9 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "0.1.0",
+    "command": "g++",
+    "isShellCommand": true,
+    "args": ["-std=c++11", "-g", "-I", "/home/htao/xml2json/include", "-I", "/home/htao/hl7parser-json/hl7parser-json/include", "hl7parser-json/test.cpp", "-o", "main.out"],
+    "showOutput": "always"
+}

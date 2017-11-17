@@ -1,3 +1,7 @@
+#ifndef HL7PARSER_DLL
+#define HL7PARSER_DLL
+#endif
+
 #include "hl7parser-json.hpp"
 #include <regex>
 

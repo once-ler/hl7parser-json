@@ -5,3 +5,4 @@
 *.VC.opendb
 x64/
 internal/
+build/
