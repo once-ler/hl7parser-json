@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/hl7parser-json/build/bin/testing",
+            "program": "${workspaceRoot}/hl7parser-json/testing",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
