@@ -7,3 +7,4 @@ lib/
 **/Makefile
 data/
 **/x64
+internal/

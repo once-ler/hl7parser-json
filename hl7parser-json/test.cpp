@@ -4,6 +4,8 @@
 
 #include "hl7parser-json.hpp"
 #include <regex>
+#include <map>
+#include <functional>
 
 #include <hl7parser/seg_pid.h>
 #include <hl7parser/seg_obx.h>
@@ -60,6 +62,71 @@ void testHeaderOnly(string input) {
   }
 }
 
+typedef HL7_Element* GetHL7ElementFunc(HL7_Segment*);
+
+class HL7Base {
+protected:
+  string getString(HL7_Segment* segment, GetHL7ElementFunc f) {
+    HL7_Element* el;
+    el = f(segment);
+    string m(el->value, el->length);
+    return move(m);
+  }
+};
+
+class HL7Patient : public HL7Base {
+  HL7_Segment* segment;
+public:
+  HL7Patient(HL7_Segment* segment_) : segment(segment_) {}
+  string patientId() {
+    return getString(segment, hl7_pid_patient_id);
+  }
+  string firstName() {
+    return getString(segment, hl7_pid_first_name);
+  }
+  string lastName() {
+    return getString(segment, hl7_pid_last_name);
+  }
+};
+
+void processMessage(HL7_Message* message) {
+  int rc = 0, row_idx = 0;
+  HL7_Segment segment;
+  HL7_Element* el;
+  regex e("y", regex_constants::icase | regex_constants::ECMAScript);
+  
+  rc = hl7_message_segment(message, &segment, "PID", 0);
+  if (rc == 0) {
+    // Patient
+    HL7Patient patient{&segment};
+    cout << patient.patientId() << endl;
+    cout << patient.firstName() << endl;
+    cout << patient.lastName() << endl;
+  }
+
+  row_idx = 0;
+  rc = 0;
+
+  while (rc == 0) {
+    rc = hl7_message_segment(message, &segment, "OBX", row_idx);
+    if (rc == 0) {
+      // Observation
+      el = hl7_obx_observation_value_text(&segment);
+      // cout << el->length << endl;
+      if (el->length == 0) {
+        el = hl7_obx_observation_value(&segment);
+      }
+      string m(el->value, el->length);
+      
+      if (std::regex_match (m, e)) {
+        cout << m << endl;
+        break;
+      }
+    }
+    ++row_idx;
+  }
+}
+
 int testLibParse() {
   int             rc = 0;
   HL7_Settings    settings;
@@ -87,29 +154,9 @@ int testLibParse() {
   hl7_parser_init(&parser, &settings);
 
   rc = hl7_parser_read(&parser, &message, &input_buffer);
+  
   if (rc == 0) {
-    HL7_Segment segment;
-    HL7_Element* el;
-    int sequence = 0;
-    
-    rc = hl7_message_segment(&message, &segment, "PID", 0);
-    if (rc == 0) {
-      // Patient
-      el = hl7_pid_patient_id(&segment);
-      string m(el->value, el->length);
-      cout << m << endl;
-    }
-
-    rc = hl7_message_segment(&message, &segment, "OBX", 1);
-    if (rc == 0) {
-      // Observation
-      el = hl7_obx_observation_value_text(&segment);
-      cout << el->length << endl;
-      el = hl7_obx_observation_value(&segment);
-      auto tk = el->attr;
-      string m(el->value, el->length);
-      cout << m << endl;
-    }
+    processMessage(&message);
   }
 
   /* Cleanup */

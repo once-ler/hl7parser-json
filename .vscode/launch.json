@@ -11,6 +11,7 @@
             "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": false,
+            "preLaunchTask": "Build test",
             "logging": {
                 "moduleLoad": false,
                 "trace": true
