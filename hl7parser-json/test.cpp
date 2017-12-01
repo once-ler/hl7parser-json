@@ -65,27 +65,63 @@ void testHeaderOnly(string input) {
 typedef HL7_Element* GetHL7ElementFunc(HL7_Segment*);
 
 class HL7Base {
+public:
+  HL7Base(HL7_Message* message_) : message(message_) {}
 protected:
-  string getString(HL7_Segment* segment, GetHL7ElementFunc f) {
+  HL7_Segment segment;
+  HL7_Message* message;
+  
+  string getString(GetHL7ElementFunc f) {
     HL7_Element* el;
-    el = f(segment);
+    el = f(&segment);
     string m(el->value, el->length);
     return move(m);
   }
 };
 
 class HL7Patient : public HL7Base {
-  HL7_Segment* segment;
 public:
-  HL7Patient(HL7_Segment* segment_) : segment(segment_) {}
+  HL7Patient(HL7_Message* message_) : HL7Base(message_) {
+    hl7_message_segment(message, &segment, "PID", 0);
+  }
   string patientId() {
-    return getString(segment, hl7_pid_patient_id);
+    return getString(hl7_pid_patient_id);
   }
   string firstName() {
-    return getString(segment, hl7_pid_first_name);
+    return getString(hl7_pid_first_name);
   }
   string lastName() {
-    return getString(segment, hl7_pid_last_name);
+    return getString(hl7_pid_last_name);
+  }
+};
+
+class HL7Observation : public HL7Base {
+public:
+  HL7Observation(HL7_Message* message_) : HL7Base(message_) {}
+
+  vector<string> observationValues() {
+    vector<string> vals;
+    int row_idx = 0;
+    int rc = 0;
+    string m;
+
+    while (rc == 0) {
+      rc = hl7_message_segment(message, &segment, "OBX", row_idx);
+      if (rc == 0) {
+        // el = hl7_obx_observation_value_text(&segment);
+        // Same as: el = hl7_segment_field(&segment, 4);
+        m = getString(hl7_obx_observation_value_text);
+        if (m.size() == 0) {
+          // el = hl7_obx_observation_value(&segment);
+          // Same as: el = hl7_segment_component(&segment, 4, 0);
+          // Ideally, should iterate all subcomponents (ie, (4, 0), (4, 1), ...), if known.
+          m = getString(hl7_obx_observation_value);
+        }
+        vals.push_back(move(m));        
+      }
+      ++row_idx;
+    }
+    return vals;
   }
 };
 
@@ -93,38 +129,28 @@ void processMessage(HL7_Message* message) {
   int rc = 0, row_idx = 0;
   HL7_Segment segment;
   HL7_Element* el;
-  regex e("y", regex_constants::icase | regex_constants::ECMAScript);
+  regex ex("y", regex_constants::icase | regex_constants::ECMAScript);
   
-  rc = hl7_message_segment(message, &segment, "PID", 0);
-  if (rc == 0) {
-    // Patient
-    HL7Patient patient{&segment};
-    cout << patient.patientId() << endl;
-    cout << patient.firstName() << endl;
-    cout << patient.lastName() << endl;
+  // Patient
+  HL7Patient patient{message};
+  cout << patient.patientId() << endl;
+  cout << patient.firstName() << endl;
+  cout << patient.lastName() << endl;
+
+  HL7Observation observation{message};
+
+  auto vals = observation.observationValues();
+  for(const auto& e : vals) {
+    cout << e << endl;
   }
 
-  row_idx = 0;
-  rc = 0;
+  // Find "Y" in list of observations.
+  auto it = find_if(vals.begin(), vals.end(), [&ex](const auto& m)->bool { return std::regex_match(m, ex); });
 
-  while (rc == 0) {
-    rc = hl7_message_segment(message, &segment, "OBX", row_idx);
-    if (rc == 0) {
-      // Observation
-      el = hl7_obx_observation_value_text(&segment);
-      // cout << el->length << endl;
-      if (el->length == 0) {
-        el = hl7_obx_observation_value(&segment);
-      }
-      string m(el->value, el->length);
-      
-      if (std::regex_match (m, e)) {
-        cout << m << endl;
-        break;
-      }
-    }
-    ++row_idx;
+  if (it != vals.end()) {
+    cout << *it << endl;
   }
+
 }
 
 int testLibParse() {
