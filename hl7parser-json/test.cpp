@@ -67,10 +67,11 @@ typedef HL7_Element* GetHL7ElementFunc(HL7_Segment*);
 class HL7Base {
 public:
   HL7Base(HL7_Message* message_) : message(message_) {}
+  HL7Base(HL7_Segment* segment_) : segment(*segment_) {}
 protected:
   HL7_Segment segment;
   HL7_Message* message;
-  
+
   string getString(GetHL7ElementFunc f) {
     HL7_Element* el;
     el = f(&segment);
@@ -99,6 +100,8 @@ class HL7Observation : public HL7Base {
 public:
   HL7Observation(HL7_Message* message_) : HL7Base(message_) {}
 
+  HL7Observation(HL7_Segment* segment_) : HL7Base(segment_) {}
+
   vector<string> observationValues() {
     vector<string> vals;
     int row_idx = 0;
@@ -122,6 +125,80 @@ public:
       ++row_idx;
     }
     return vals;
+  }
+};
+
+class HL7Message {
+  friend HL7Patient;
+  friend HL7Observation;
+  string hl7string;
+  int             rc = -1;
+  HL7_Settings    settings;
+  HL7_Buffer      input_buffer;
+  HL7_Buffer      output_buffer;
+  HL7_Allocator   allocator;
+  HL7_Message     message;
+  HL7_Segment segment;
+  HL7_Parser      parser;
+  size_t          message_length = 0;
+public:
+  HL7Message() = default;
+  HL7Message(const string& hl7string_) : hl7string(hl7string_) {
+    parse();
+  }
+  ~HL7Message() {
+    if (rc != 0) return;
+    /* Cleanup */
+    hl7_buffer_fini(&output_buffer);
+    
+    hl7_parser_fini(&parser);
+
+    hl7_message_fini(&message);
+    hl7_allocator_fini(&allocator);
+
+    hl7_buffer_fini(&input_buffer);
+    hl7_settings_fini(&settings);
+  }
+
+  void parse(const string& hl7string_ = "") {
+    if (hl7string_.size() > 0)
+      hl7string = hl7string_;
+
+    if (hl7string.size() == 0) return;
+
+    message_length = hl7string.size();
+    hl7_settings_init(&settings);
+
+    /* Initialize the buffer excluding the null terminator. */
+    hl7_buffer_init(&input_buffer, const_cast<char*>(hl7string.c_str()), message_length);
+    hl7_buffer_move_wr_ptr(&input_buffer, message_length);
+
+    /* Initialize the message */
+    hl7_allocator_init(&allocator, malloc, free);
+    hl7_message_init(&message, &settings, &allocator);
+
+    /* Initialize the parser. */
+    hl7_parser_init(&parser, &settings);
+
+    rc = hl7_parser_read(&parser, &message, &input_buffer);
+  }
+
+  shared_ptr<HL7Patient> patient() {
+    return make_shared<HL7Patient>(&message);
+  }
+
+  vector<shared_ptr<HL7Observation>> observations() {
+    size_t row_idx = 0;
+    int rc = 0;
+    while (rc == 0) {
+      rc = hl7_message_segment(&message, &segment, "OBX", row_idx);
+
+      if (rc == 0) {
+        auto observation = HL7Observation{&segment};
+      }
+
+      ++row_idx;
+    }
   }
 };
 
@@ -165,6 +242,20 @@ int testLibParse() {
 
   auto mdm = getSampleFile("internal/realmdm.txt");
   message_length = mdm.size();
+
+  {
+    HL7Message hl7m{"fail"};
+  }
+  {
+    HL7Message hl7m{""};
+  }
+  {
+    HL7Message hl7m{mdm};
+    auto patient = hl7m.patient();
+    cout << patient->firstName() << endl;
+
+    auto observations = hl7m.observations();
+  }
 
   hl7_settings_init(&settings);
 
