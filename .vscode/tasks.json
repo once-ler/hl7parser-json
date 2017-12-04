@@ -24,6 +24,7 @@
                 "-I", "/usr/local/include",
                 "-I", "/home/htao/xml2json/include",
                 "-I", "/home/htao/hl7parser-json/hl7parser-json/include",
+                "-I", "/home/htao/hl7parser-json/hl7parser-cpp/src",
                 "-L", "/usr/local/lib",
                 "hl7parser-json/test.cpp",
                 "-o", "hl7parser-json/testing",

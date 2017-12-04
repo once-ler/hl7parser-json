@@ -3,6 +3,7 @@
 #endif
 
 #include "hl7parser-json.hpp"
+#include "HL7Message.hpp"
 #include <regex>
 #include <map>
 #include <functional>
@@ -11,6 +12,7 @@
 #include <hl7parser/seg_obx.h>
 
 using namespace hl7parserJson;
+using namespace hl7parsercpp;
 using namespace std;
 
 static char MESSAGE_DATA[] =
@@ -62,169 +64,6 @@ void testHeaderOnly(string input) {
     cout << e.what() << endl;
   }
 }
-
-typedef HL7_Element* GetHL7ElementFunc(HL7_Segment*);
-
-class HL7Base {
-public:
-  HL7Base(HL7_Message* message_, const string& segmentId_, int segmentPosition_) : message(message_), segmentId(segmentId_), segmentPosition(segmentPosition_) {
-    hl7_message_segment(message, &segment, segmentId.c_str(), segmentPosition);
-  }
-protected:
-  HL7_Message* message;
-  HL7_Segment segment;
-  string segmentId;
-  int segmentPosition = 0;
-
-  string getString(GetHL7ElementFunc f) {
-    HL7_Element* el;
-    el = f(&segment);
-    string m(el->value, el->length);
-    return move(m);
-  }
-
-  vector<string> getComponents(HL7_Segment* segment, int pos) {
-    vector<string> vals;
-    HL7_Element* el;
-    string m;
-    int idx = 0;
-    auto n = segment->message_node;
-
-    do {
-      el = hl7_segment_component(segment, pos, idx);
-      m = string(el->value, el->length);
-      vals.push_back(move(m));
-      ++idx;
-    } while (el->length > 0 || el->attr > 0);
-    return vals;
-  }
-};
-
-class HL7Patient : public HL7Base {
-public:
-  
-  HL7Patient(HL7_Message* message_) : HL7Base(message_, "PID", 0) {}
-  
-  string patientId() {
-    return getString(hl7_pid_patient_id);
-  }
-  string firstName() {
-    return getString(hl7_pid_first_name);
-  }
-  string lastName() {
-    return getString(hl7_pid_last_name);
-  }
-  vector<string> patientIdentifierList() {
-    auto results = getComponents(&segment, 2);
-    return move(results);
-  }
-};
-
-class HL7Observation : public HL7Base {
-public:
-  HL7Observation(HL7_Message* message_, int segmentPosition_) : HL7Base(message_, "OBX", segmentPosition_) {}
-  
-  vector<string> observationValues() {
-    vector<string> vals;
-    HL7_Element* el;
-    string m;
-    // el = hl7_obx_observation_value_text(&segment);
-    // Same as: el = hl7_segment_field(&segment, 4);
-    m = getString(hl7_obx_observation_value_text);
-    if (m.size() > 0) {
-      vals.push_back(move(m));
-    } else {
-      // el = hl7_obx_observation_value(&segment);
-      // Same as: el = hl7_segment_component(&segment, 4, 0);
-      auto results = getComponents(&segment, 4);
-      vals = move(results);
-    }
-    return vals;
-  }
-};
-
-class HL7Message {
-  friend HL7Patient;
-  friend HL7Observation;
-  string hl7string;
-  int             rc = -1;
-  HL7_Settings    settings;
-  HL7_Buffer      input_buffer;
-  HL7_Buffer      output_buffer;
-  HL7_Allocator   allocator;
-  HL7_Message     message;
-  HL7_Segment segment;
-  HL7_Parser      parser;
-  size_t          message_length = 0;
-public:
-  HL7Message() = default;
-  HL7Message(const string& hl7string_) : hl7string(hl7string_) {
-    parse();
-  }
-  ~HL7Message() {
-    if (rc != 0) return;
-    /* Cleanup */
-    hl7_buffer_fini(&output_buffer);
-    
-    hl7_parser_fini(&parser);
-
-    hl7_message_fini(&message);
-    hl7_allocator_fini(&allocator);
-
-    hl7_buffer_fini(&input_buffer);
-    hl7_settings_fini(&settings);
-  }
-
-  string toComponentString(const vector<string> vals) {
-    stringstream all;
-    copy(vals.begin(), vals.end(), ostream_iterator<string>(all, "^"));
-    return move(all.str());
-  }
-
-  void parse(const string& hl7string_ = "") {
-    if (hl7string_.size() > 0)
-      hl7string = hl7string_;
-
-    if (hl7string.size() == 0) return;
-
-    message_length = hl7string.size();
-    hl7_settings_init(&settings);
-
-    // Initialize the buffer excluding the null terminator.
-    hl7_buffer_init(&input_buffer, const_cast<char*>(hl7string.c_str()), message_length);
-    hl7_buffer_move_wr_ptr(&input_buffer, message_length);
-
-    // Initialize the message.
-    hl7_allocator_init(&allocator, malloc, free);
-    hl7_message_init(&message, &settings, &allocator);
-
-    // Initialize the parser.
-    hl7_parser_init(&parser, &settings);
-
-    rc = hl7_parser_read(&parser, &message, &input_buffer);
-  }
-
-  shared_ptr<HL7Patient> patient() {
-    return make_shared<HL7Patient>(&message);
-  }
-
-  vector<shared_ptr<HL7Observation>> observations() {
-    vector<shared_ptr<HL7Observation>> obs;
-    size_t row_idx = 0;
-    int rc = 0;
-    while (rc == 0) {
-      rc = hl7_message_segment(&message, &segment, "OBX", row_idx);
-
-      if (rc == 0) {
-        auto observation = make_shared<HL7Observation>(&message, row_idx);
-        obs.push_back(move(observation));
-      }
-
-      ++row_idx;
-    }
-    return obs;
-  }
-};
 
 int testLibParse() {
   
