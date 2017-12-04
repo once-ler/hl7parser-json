@@ -26,12 +26,13 @@ static char MESSAGE_DATA[] =
 "NTE|2||IVA: SI\r";
 
 string getSampleFile(const string& filename = "data/adt_a08.txt") {
-  regex newline("\n");
+  regex newline("\r\n");
   ifstream infile{ filename };
   if (infile.fail()) {
     cerr << strerror(errno) << endl;
     return "";
   }
+  
   string file_contents{ istreambuf_iterator<char>(infile), istreambuf_iterator<char>() };
   return regex_replace(file_contents, newline, "\r");
 }
@@ -82,19 +83,19 @@ protected:
     return move(m);
   }
 
-  vector<string> getSubcomponents(HL7_Segment* segment, int pos) {
+  vector<string> getComponents(HL7_Segment* segment, int pos) {
     vector<string> vals;
     HL7_Element* el;
     string m;
     int idx = 0;
+    auto n = segment->message_node;
+
     do {
       el = hl7_segment_component(segment, pos, idx);
       m = string(el->value, el->length);
-      if (m.size() > 0) {
-        vals.push_back(move(m));
-      }
+      vals.push_back(move(m));
       ++idx;
-    } while (m.size() > 0);
+    } while (el->length > 0 || el->attr > 0);
     return vals;
   }
 };
@@ -102,8 +103,7 @@ protected:
 class HL7Patient : public HL7Base {
 public:
   
-  HL7Patient(HL7_Message* message_) : HL7Base(message_, "PID", 0) {
-  }
+  HL7Patient(HL7_Message* message_) : HL7Base(message_, "PID", 0) {}
   
   string patientId() {
     return getString(hl7_pid_patient_id);
@@ -113,6 +113,10 @@ public:
   }
   string lastName() {
     return getString(hl7_pid_last_name);
+  }
+  vector<string> patientIdentifierList() {
+    auto results = getComponents(&segment, 2);
+    return move(results);
   }
 };
 
@@ -132,7 +136,7 @@ public:
     } else {
       // el = hl7_obx_observation_value(&segment);
       // Same as: el = hl7_segment_component(&segment, 4, 0);
-      auto results = getSubcomponents(&segment, 4);
+      auto results = getComponents(&segment, 4);
       vals = move(results);
     }
     return vals;
@@ -169,6 +173,12 @@ public:
 
     hl7_buffer_fini(&input_buffer);
     hl7_settings_fini(&settings);
+  }
+
+  string toComponentString(const vector<string> vals) {
+    stringstream all;
+    copy(vals.begin(), vals.end(), ostream_iterator<string>(all, "^"));
+    return move(all.str());
   }
 
   void parse(const string& hl7string_ = "") {
@@ -218,8 +228,9 @@ public:
 
 int testLibParse() {
   
-  auto mdm = getSampleFile("internal/realmdm.txt");
-  
+  // auto mdm = getSampleFile("internal/realmdm.txt");
+  auto mdm = getSampleFile("internal/adt_a31.txt");
+
   {
     HL7Message hl7m{"fail"};
   }
@@ -230,6 +241,10 @@ int testLibParse() {
     HL7Message hl7m{mdm};
     auto patient = hl7m.patient();
     cout << patient->firstName() << endl;
+
+    auto pil = hl7m.toComponentString(patient->patientIdentifierList());
+
+    cout << pil << endl;
 
     auto observations = hl7m.observations();
 
