@@ -81,12 +81,15 @@ int testLibParse() {
     auto patient = hl7m.patient();
     cout << patient->firstName() << endl;
 
-    auto pil = hl7m.toComponentString(patient->PatientIdentifierList());
-    cout << pil << endl;
+    auto x = patient->PatientIdentifierListX();
 
+    cout << hl7m.toComponentString(patient->PatientIdentifierList()) << endl;
     cout << patient->DateTimeOfBirth() << endl;
-
+    cout << patient->AdministrativeSex() << endl;
     cout << hl7m.toComponentString(patient->Race()) << endl;
+    cout << hl7m.toComponentString(patient->PatientAddress()) << endl;
+    cout << hl7m.toComponentString(patient->PhoneNumberHome()) << endl;
+    cout << hl7m.toComponentString(patient->EthnicGroup()) << endl;
 
     auto observations = hl7m.observations();
 

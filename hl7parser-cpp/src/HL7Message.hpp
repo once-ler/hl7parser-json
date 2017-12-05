@@ -4,7 +4,7 @@
 #include "HL7Observation.hpp"
 
 namespace hl7parsercpp {
-  static string version = "0.3.1";
+  static string version = "0.3.2";
 
   class HL7Message {
     friend HL7Patient;
@@ -42,7 +42,9 @@ namespace hl7parsercpp {
     string toComponentString(const vector<string> vals) {
       stringstream all;
       copy(vals.begin(), vals.end(), ostream_iterator<string>(all, "^"));
-      return move(all.str());
+      string s = all.str();
+      s.pop_back();
+      return move(s);
     }
 
     void parse(const string& hl7string_ = "") {

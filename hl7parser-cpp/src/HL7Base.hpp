@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <utility>
 #include <hl7parser/message.h>
 
 using namespace std;
@@ -36,12 +37,57 @@ namespace hl7parsercpp {
       
       do {
         el = hl7_segment_component(&segment, pos, idx);
+        if (!(el->length ^ el->attr) == 1)
+            break;
+            
         m = string(el->value, el->length);
         vals.push_back(move(m));
         ++idx;
-      } while (el->length > 0 || el->attr > 0);
+      } while (true);
       return vals;
     }
+
+    vector<pair<string, vector<string>>> getComponentsAndSubComponents(int pos) {
+      vector<pair<string, vector<string>>> vals;
+      HL7_Element* el;
+      HL7_Element* el1;
+      string m;
+      int idx = 0, sub_idx = 0;
+            
+      do {
+        el = hl7_segment_component(&segment, pos, idx);
+        if (!(el->length ^ el->attr) == 1)
+            break;
+        
+        pair<string, vector<string>> pa;
+
+        m = string(el->value, el->length);
+        pa.first = m;
+
+        sub_idx = 0;
+        vector<string> sc;
+        
+        do {
+          el1 = hl7_segment_subcomponent(&segment, pos, idx, sub_idx);
+          if (!(el1->length ^ el1->attr) == 1)
+            break;
+          m = string(el1->value, el1->length);
+
+          sc.push_back(move(m));
+          ++sub_idx;
+        } while (true);
+        
+        pa.second = sc;
+
+        vals.push_back(move(pa));
+        
+        ++idx;
+      } while (true);
+      return vals;
+
+      // 
+    }
+
   };
 
 }

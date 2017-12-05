@@ -24,6 +24,11 @@ namespace hl7parsercpp {
       return move(results);
     }
 
+    vector<pair<string, vector<string>>> PatientIdentifierListX() {
+      auto results = getComponentsAndSubComponents(2);
+      return move(results);
+    }
+
     vector<string> PatientName() {
       auto results = getComponents(4);
       return move(results);
@@ -35,7 +40,7 @@ namespace hl7parsercpp {
       });
     }
 
-    string AdministrativSex() {
+    string AdministrativeSex() {
       return getString([](HL7_Segment* seg) {
         return hl7_segment_field(seg, 7);
       });
