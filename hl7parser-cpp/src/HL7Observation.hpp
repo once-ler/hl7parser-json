@@ -8,7 +8,7 @@ namespace hl7parsercpp {
   public:
     HL7Observation(HL7_Message* message_, int segmentPosition_) : HL7Base(message_, "OBX", segmentPosition_) {}
     
-    vector<string> observationValues() {
+    vector<string> ObservationValues() {
       vector<string> vals;
       HL7_Element* el;
       string m;
@@ -20,7 +20,7 @@ namespace hl7parsercpp {
       } else {
         // el = hl7_obx_observation_value(&segment);
         // Same as: el = hl7_segment_component(&segment, 4, 0);
-        auto results = getComponents(&segment, 4);
+        auto results = getComponents(4);
         vals = move(results);
       }
       return vals;

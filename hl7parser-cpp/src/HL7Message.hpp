@@ -4,6 +4,8 @@
 #include "HL7Observation.hpp"
 
 namespace hl7parsercpp {
+  static string version = "0.3.1";
+
   class HL7Message {
     friend HL7Patient;
     friend HL7Observation;

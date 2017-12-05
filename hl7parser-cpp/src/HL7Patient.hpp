@@ -18,8 +18,50 @@ namespace hl7parsercpp {
     string lastName() {
       return getString(hl7_pid_last_name);
     }
-    vector<string> patientIdentifierList() {
-      auto results = getComponents(&segment, 2);
+
+    vector<string> PatientIdentifierList() {
+      auto results = getComponents(2);
+      return move(results);
+    }
+
+    vector<string> PatientName() {
+      auto results = getComponents(4);
+      return move(results);
+    }
+
+    string DateTimeOfBirth() {
+      return getString([](HL7_Segment* seg) {
+        return hl7_segment_field(seg, 6);
+      });
+    }
+
+    string AdministrativSex() {
+      return getString([](HL7_Segment* seg) {
+        return hl7_segment_field(seg, 7);
+      });
+    }
+
+    vector<string> Race() {
+      auto results = getComponents(9);
+      return move(results);
+    }
+
+    // XAD Component Type
+    // http://hl7-definition.caristix.com:9010/Default.aspx?version=HL7%20v2.5.1&dataType=XAD
+    vector<string> PatientAddress() {
+      auto results = getComponents(10);
+      return move(results);
+    }
+
+    // XTN Component Type
+    // http://hl7-definition.caristix.com:9010/Default.aspx?version=HL7%20v2.5.1&dataType=XTN
+    vector<string> PhoneNumberHome() {
+      auto results = getComponents(12);
+      return move(results);
+    }
+
+    vector<string> EthnicGroup() {
+      auto results = getComponents(21);
       return move(results);
     }
   };

@@ -148,6 +148,7 @@
         <component      name="id_type"                                  index="2.4"     length="2"/>
         <component      name="last_name"                                index="4.0"     length="25"/>
         <component      name="first_name"                               index="4.1"     length="25"/>
+        <field          name="date_time_of_birth"                       index="6"       length="14" data_type="date" />
     </segment>
 
     <!-- PR1: Procedure information -->

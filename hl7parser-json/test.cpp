@@ -81,17 +81,20 @@ int testLibParse() {
     auto patient = hl7m.patient();
     cout << patient->firstName() << endl;
 
-    auto pil = hl7m.toComponentString(patient->patientIdentifierList());
-
+    auto pil = hl7m.toComponentString(patient->PatientIdentifierList());
     cout << pil << endl;
+
+    cout << patient->DateTimeOfBirth() << endl;
+
+    cout << hl7m.toComponentString(patient->Race()) << endl;
 
     auto observations = hl7m.observations();
 
     for(const auto o : observations) {
-      auto vals = o->observationValues();
-      stringstream all;
-      copy(vals.begin(), vals.end(), ostream_iterator<string>(all, ","));
-      cout << all.str() << endl;
+      auto vals = o->ObservationValues();     
+      auto obs = hl7m.toComponentString(vals);
+
+      cout << obs << endl;
 
       // Find "Y" in list of observations.
       regex ex("y", regex_constants::icase | regex_constants::ECMAScript);
