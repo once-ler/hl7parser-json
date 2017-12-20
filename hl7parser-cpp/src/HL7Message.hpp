@@ -1,12 +1,14 @@
 #pragma once
 
+#include "HL7Header.hpp"
 #include "HL7Patient.hpp"
 #include "HL7Observation.hpp"
 
 namespace hl7parsercpp {
-  static string version = "0.3.2";
+  static string version = "0.3.3";
 
   class HL7Message {
+    friend HL7Header;
     friend HL7Patient;
     friend HL7Observation;
 
@@ -68,6 +70,10 @@ namespace hl7parsercpp {
       hl7_parser_init(&parser, &settings);
 
       rc = hl7_parser_read(&parser, &message, &input_buffer);
+    }
+
+    shared_ptr<HL7Header> header() {
+      return make_shared<HL7Header>(&message);
     }
 
     shared_ptr<HL7Patient> patient() {

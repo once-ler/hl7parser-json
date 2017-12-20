@@ -78,6 +78,16 @@ int testLibParse() {
   }
   {
     HL7Message hl7m{mdm};
+    auto header = hl7m.header();
+
+    auto hm = header->Header();
+
+    for(const auto& e: hm) {
+      cout << e.first << ": " << e.second << endl;
+    }
+  }  
+  {
+    HL7Message hl7m{mdm};
     auto patient = hl7m.patient();
     cout << patient->firstName() << endl;
 

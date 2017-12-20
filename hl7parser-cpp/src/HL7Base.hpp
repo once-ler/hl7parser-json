@@ -3,6 +3,9 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <map>
+#include <sstream>
+#include <iterator>
 #include <utility>
 #include <hl7parser/message.h>
 
@@ -21,6 +24,14 @@ namespace hl7parsercpp {
     HL7_Segment segment;
     string segmentId;
     int segmentPosition = 0;
+
+    string concat(const vector<string> vals, const char* delim) {
+      stringstream all;
+      copy(vals.begin(), vals.end(), ostream_iterator<string>(all, delim));
+      string s = all.str();
+      s.pop_back();
+      return move(s);
+    }
 
     string getString(GetHL7ElementFunc f) {
       HL7_Element* el;
