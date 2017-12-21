@@ -3,9 +3,12 @@
 #include "HL7Header.hpp"
 #include "HL7Patient.hpp"
 #include "HL7Observation.hpp"
+#include "Util.hpp"
+
+using namespace util;
 
 namespace hl7parsercpp {
-  static string version = "0.3.3";
+  static string version = "0.3.4";
 
   class HL7Message {
     friend HL7Header;
@@ -96,5 +99,27 @@ namespace hl7parsercpp {
       }
       return obs;
     }
+
+    string acknowledgment() {
+      auto header = this->header();
+      auto hm = header->Header();
+
+      auto ackSuccess = hof::map<pair<string,string>, string>(hm, [](const auto& e) {
+        if (e.first == "FieldSeparator") return string("");
+        if (e.first == "MessageType") return strings::concat(string("ACK^"), strings::split(e.second, '^')[1]);
+        return e.second;
+      });
+
+      auto ackMessage = strings::concat(
+        string("MSH|"),
+        strings::join(ackSuccess.begin(), ackSuccess.end(), string("|")),
+        string("\rMSA|AA|"),
+        header->MessageControlID(),
+        string("||||")
+      );
+
+      return move(ackMessage);
+    }
+
   };
 }

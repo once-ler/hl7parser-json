@@ -109,25 +109,25 @@ namespace hl7parsercpp {
       return {
         { "FieldSeparator", FieldSeparator() },
         { "EncodingCharacters", EncodingCharacters() },
-        { "SendingApplication", concat(SendingApplication(), "^") },
-        { "SendingFacility", concat(SendingFacility(), "^") },
-        { "ReceivingApplication", concat(ReceivingApplication(), "^") },
-        { "ReceivingFacility", concat(ReceivingFacility(), "^") },
+        { "SendingApplication", join(SendingApplication(), "^") },
+        { "SendingFacility", join(SendingFacility(), "^") },
+        { "ReceivingApplication", join(ReceivingApplication(), "^") },
+        { "ReceivingFacility", join(ReceivingFacility(), "^") },
         { "DateTimeOfMessage", DateTimeOfMessage() },
         { "Security", Security() },
-        { "MessageType", concat(MessageType(), "^") },
+        { "MessageType", join(MessageType(), "^") },
         { "MessageControlID", MessageControlID() },
-        { "ProcessingID", concat(ProcessingID(), "^") },
-        { "VersionID", concat(VersionID(), "^") },
+        { "ProcessingID", join(ProcessingID(), "^") },
+        { "VersionID", join(VersionID(), "^") },
         { "SequenceNumber", SequenceNumber() },
         { "ContinuationPointer", ContinuationPointer() },
         { "AcceptAcknowledgmentType", AcceptAcknowledgmentType() },
         { "ApplicationAcknowledgmentType", ApplicationAcknowledgmentType() },
         { "CountryCode", CountryCode() },
         { "CharacterSet", CharacterSet() },
-        { "PrincipalLanguageOfMessage", concat(PrincipalLanguageOfMessage(), "^") },
+        { "PrincipalLanguageOfMessage", join(PrincipalLanguageOfMessage(), "^") },
         { "AlternateCharacterSetHandlingScheme", AlternateCharacterSetHandlingScheme() },
-        { "MessageProfileIdentifier", concat(MessageProfileIdentifier(), "^") }
+        { "MessageProfileIdentifier", join(MessageProfileIdentifier(), "^") }
       };
     };
 

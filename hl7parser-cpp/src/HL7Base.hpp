@@ -25,7 +25,7 @@ namespace hl7parsercpp {
     string segmentId;
     int segmentPosition = 0;
 
-    string concat(const vector<string> vals, const char* delim) {
+    string join(const vector<string> vals, const char* delim) {
       stringstream all;
       copy(vals.begin(), vals.end(), ostream_iterator<string>(all, delim));
       string s = all.str();
