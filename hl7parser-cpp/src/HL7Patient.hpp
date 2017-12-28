@@ -69,5 +69,19 @@ namespace hl7parsercpp {
       auto results = getComponents(21);
       return move(results);
     }
+
+    vector<pair<string, string>> Patient() {
+      return {
+        { "PatientIdentifierList", join(PatientIdentifierList(), "^") },
+        { "PatientName", join(PatientName(), "^") },
+        { "DateTimeOfBirth", DateTimeOfBirth() },
+        { "AdministrativeSex", AdministrativeSex() },
+        { "Race", join(Race(), "^") },
+        { "PatientAddress", join(PatientAddress(), "^") },
+        { "PhoneNumberHome", join(PhoneNumberHome(), "^") },
+        { "EthnicGroup", join(EthnicGroup(), "^") }
+      };
+    }
+
   };
 }

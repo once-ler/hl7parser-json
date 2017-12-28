@@ -3,9 +3,9 @@
 #include "HL7Header.hpp"
 #include "HL7Patient.hpp"
 #include "HL7Observation.hpp"
-#include "Util.hpp"
+#include "HL7Util.hpp"
 
-using namespace util;
+using namespace hl7parsercpp::util;
 
 namespace hl7parsercpp {
   static string version = "0.3.4";

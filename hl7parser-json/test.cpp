@@ -4,7 +4,7 @@
 
 #include "hl7parser-json.hpp"
 #include "HL7Message.hpp"
-#include "Util.hpp"
+#include "HL7Util.hpp"
 #include <regex>
 #include <map>
 #include <functional>
@@ -15,7 +15,7 @@
 
 using namespace hl7parserJson;
 using namespace hl7parsercpp;
-using namespace util;
+using namespace hl7parsercpp::util;
 using namespace std;
 
 static char MESSAGE_DATA[] =
@@ -85,7 +85,13 @@ int testLibParse() {
 
     auto hm = header->Header();
 
+    auto msg_type = hl7m.toComponentString(header->MessageType());
+    auto msg_ctrl_id = header->MessageControlID();
+
     auto ackMessage = hl7m.acknowledgment();
+
+    auto patient = hl7m.patient();
+    auto pa = patient->Patient();
 
     // cout << ackMessage << endl;
     ofstream f("internal/test.ack");
