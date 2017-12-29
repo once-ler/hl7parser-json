@@ -3,7 +3,7 @@
 #include "rxweb.hpp"
 #include "server.hpp"
 #include "extensions.hpp"
-#include "hl7parserrxweb_common.hpp"
+#include "model/hl7MessageModel.hpp"
 #include "mongo_base_client.hpp"
 #include "HL7Util.hpp"
 
@@ -32,25 +32,23 @@ namespace hl7parserrxweb::middleware {
           auto content = t.request->content.string();
 
           HL7Message hl7m{content};
+          string streamType = hl7m.streamType();
 
-          // Parse message to get PID Identifier.
-          auto patient = hl7m.patient();
-          auto pid_id = patient.patientId();
-
-          // Get the message event type.
-          auto header = hl7m.header();
-          auto hm = header->Header();
-          auto msg_type = hl7m.toComponentString(header->MessageType());
-    
-          HL7EventModel hl7_j;
-          hl7_j.data = content;
-
+          HL7MessageModel hl7_j{ content };          
           json j = hl7_j;
-
-          string streamType = concat(msg_type, ":", pid_id);
 
           // Persist event.
           client.events.SaveOne(streamType, j);
+
+          // Emit acknowledgment.
+          auto ackMessage = hl7m.acknowledgment();
+
+          auto cptask = t;
+          *(cptask.data) = ackMessage;
+          cptask.type = "HL7ACK_RESPONSE";
+          server.getSubject().subscriber().on_next(cptask);
+
+          // More tasks to emit...
 
         } catch(const SimpleWeb::system_error& e) {
           resp = {

@@ -5,6 +5,7 @@
 #include "hl7parser-json.hpp"
 #include "HL7Message.hpp"
 #include "HL7Util.hpp"
+#include "model/hl7MessageModel.hpp"
 #include <regex>
 #include <map>
 #include <functional>
@@ -16,6 +17,7 @@
 using namespace hl7parserJson;
 using namespace hl7parsercpp;
 using namespace hl7parsercpp::util;
+using namespace hl7parserrxweb::model;
 using namespace std;
 
 static char MESSAGE_DATA[] =
@@ -92,6 +94,15 @@ int testLibParse() {
 
     auto patient = hl7m.patient();
     auto pa = patient->Patient();
+    auto pid_id = patient->patientId();
+
+    string streamType = strings::concat(msg_type, string(":"), pid_id);
+
+    cout << hl7m.streamType() << endl;
+
+    HL7MessageModel hl7_j{ mdm };
+    json j_ = hl7_j;
+    cout << j_.dump(2) << endl;
 
     // cout << ackMessage << endl;
     ofstream f("internal/test.ack");

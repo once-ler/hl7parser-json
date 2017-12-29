@@ -8,7 +8,7 @@
 using namespace hl7parsercpp::util;
 
 namespace hl7parsercpp {
-  static string version = "0.3.4";
+  static string version = "0.3.5";
 
   class HL7Message {
     friend HL7Header;
@@ -119,6 +119,19 @@ namespace hl7parsercpp {
       );
 
       return move(ackMessage);
+    }
+
+    string streamType() {
+      // Parse message to get PID Identifier.
+      auto patient = this->patient();
+      auto pid_id = patient->patientId();
+
+      // Get the message event type.
+      auto header = this->header();
+      auto msg_type = toComponentString(header->MessageType());
+
+      // Event type per patient.
+      return move(strings::concat(msg_type, string(":"), pid_id));
     }
 
   };
