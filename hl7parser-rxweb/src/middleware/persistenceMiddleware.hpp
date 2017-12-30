@@ -46,7 +46,7 @@ namespace hl7parserrxweb::middleware {
           resp = {{ "response", hl7m.acknowledgment() }};
           
           auto nextTask = t;
-          *(nextTask.data) = resp;
+          *(nextTask.data) = j;
           nextTask.type = streamType;
           server.getSubject().subscriber().on_next(nextTask);
           // More tasks to emit...          

@@ -96,6 +96,11 @@ int testLibParse() {
     auto pa = patient->Patient();
     auto pid_id = patient->patientId();
 
+    auto patient_j = patient->toJson();
+    patient_j["_id"] = pid_id;
+    patient_j["mrn"] = pid_id;
+    cout << patient_j.dump(2) << endl;
+
     string streamType = strings::concat(msg_type, string(":"), pid_id);
 
     cout << hl7m.streamType() << endl;

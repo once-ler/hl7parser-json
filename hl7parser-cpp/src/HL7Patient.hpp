@@ -83,5 +83,9 @@ namespace hl7parsercpp {
       };
     }
 
+    json toJson() {
+      return move(HL7Base::toJson(Patient()));
+    }
+
   };
 }

@@ -8,8 +8,11 @@
 #include <iterator>
 #include <utility>
 #include <hl7parser/message.h>
+#include "json.hpp"
 
 using namespace std;
+
+using json = nlohmann::json;
 
 using GetHL7ElementFunc = HL7_Element*(*)(HL7_Segment*);
 
@@ -95,8 +98,14 @@ namespace hl7parsercpp {
         ++idx;
       } while (true);
       return vals;
+    }
 
-      // 
+    json toJson(vector<pair<string, string>> segments) {
+      json j;
+      for (const auto& e : segments) {
+        j[e.first] = e.second;        
+      }
+      return move(j);
     }
 
   };
