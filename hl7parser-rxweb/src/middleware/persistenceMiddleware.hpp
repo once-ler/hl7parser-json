@@ -2,14 +2,15 @@
 
 #include "rxweb.hpp"
 #include "server.hpp"
-#include "extensions.hpp"
-#include "model/hl7MessageModel.hpp"
-#include "mongo_base_client.hpp"
-#include "HL7Util.hpp"
+#include "hl7parser-rxweb/src/model/hl7MessageModel.hpp"
+#include "store.models/src/extensions.hpp"
+#include "store.storage.mongo/src/mongo_client.hpp"
+// #include "hl7parser-cpp/src/HL7Util.hpp"
+#include "hl7parser-cpp/src/HL7Message.hpp"
 
-using namespace hl7parserrxweb::common;
+using namespace hl7parserrxweb::model;
 using namespace store::extensions;
-using namespace hl7parsercpp::util;
+using namespace hl7parsercpp;
 
 using json = nlohmann::json;
 
@@ -17,14 +18,16 @@ namespace hl7parserrxweb::middleware {
   
   template<typename S>
   rxweb::middleware<S> persistenceMiddleware(rxweb::server<S>& server, const string& environment, const json& config_j) {
-    using Mongoclient = store::storage::mongo::MongoClient<S>;
+    using Mongoclient = store::storage::mongo::MongoClient<HL7MessageModel>;
     
     return {
       [](const rxweb::task<S>& t)->bool { return (t.type == "PERSIST_HL7MESSAGE"); },
       [&](const rxweb::task<S>& t) {
-        auto uri = getPathValueFromJson(config_j, "mongo", environment, "uri");
-        auto database = getPathValueFromJson(config_j, "mongo", environment, "database");
-
+        auto config_pt = make_shared<json>(config_j);
+        auto uri = getPathValueFromJson(config_pt, "mongo", environment, "uri");
+        auto database = getPathValueFromJson(config_pt, "mongo", environment, "database");
+        json resp;
+        
         try {
           Mongoclient client(uri, database, "hl7x");
 
@@ -41,25 +44,21 @@ namespace hl7parserrxweb::middleware {
           client.events.SaveOne(streamType, j);
 
           // Emit acknowledgment.
-          auto ackMessage = hl7m.acknowledgment();
-
-          auto cptask = t;
-          *(cptask.data) = ackMessage;
-          cptask.type = "HL7ACK_RESPONSE";
-          server.getSubject().subscriber().on_next(cptask);
-
+          resp = {{ "response", hl7m.acknowledgment() }};
+          
           // More tasks to emit...
 
         } catch(const SimpleWeb::system_error& e) {
-          resp = {
-            { "error", e.what() }
-          };
+          resp = {{ "response", e.what() }};
         } catch (std::exception e) {
-          resp = {
-            { "error", e.what() }
-          };
+          resp = {{ "response", e.what() }};
         }
 
+        auto cptask = t;
+        *(cptask.data) = resp;
+        cptask.type = "HL7ACK_RESPONSE";
+        server.getSubject().subscriber().on_next(cptask);
+        
       }
     };
     

@@ -17,7 +17,7 @@ namespace hl7parserrxweb::route {
         auto sub = server.getSubject();
         auto t = WebTask{ request, response };
         t.type = "PERSIST_HL7MESSAGE";
-        t.data = make_shared<json>(config_j);
+        // t.data = make_shared<json>(config_j);
         sub.subscriber().on_next(t);
       }
     };

@@ -1,5 +1,13 @@
 #pragma once
 
+#include <hl7parser/buffer.h>
+#include <hl7parser/defs.h>
+#include <hl7parser/element.h>
+#include <hl7parser/message.h>
+#include <hl7parser/parser.h>
+#include <hl7parser/token.h>
+#include <hl7parser/settings.h>
+
 #include "HL7Header.hpp"
 #include "HL7Patient.hpp"
 #include "HL7Observation.hpp"
@@ -8,7 +16,7 @@
 using namespace hl7parsercpp::util;
 
 namespace hl7parsercpp {
-  static string version = "0.3.5";
+  static string version = "0.3.7";
 
   class HL7Message {
     friend HL7Header;
