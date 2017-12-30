@@ -5,12 +5,11 @@
 #include "hl7parser-rxweb/src/model/hl7MessageModel.hpp"
 #include "store.models/src/extensions.hpp"
 #include "store.storage.mongo/src/mongo_client.hpp"
-// #include "hl7parser-cpp/src/HL7Util.hpp"
 #include "hl7parser-cpp/src/HL7Message.hpp"
 
+using namespace hl7parsercpp;
 using namespace hl7parserrxweb::model;
 using namespace store::extensions;
-using namespace hl7parsercpp;
 
 using json = nlohmann::json;
 
@@ -43,11 +42,14 @@ namespace hl7parserrxweb::middleware {
           // Persist event.
           client.events.SaveOne(streamType, j);
 
-          // Emit acknowledgment.
+          // Acknowledgment.
           resp = {{ "response", hl7m.acknowledgment() }};
           
-          // More tasks to emit...
-
+          auto nextTask = t;
+          *(nextTask.data) = resp;
+          nextTask.type = streamType;
+          server.getSubject().subscriber().on_next(nextTask);
+          // More tasks to emit...          
         } catch(const SimpleWeb::system_error& e) {
           resp = {{ "response", e.what() }};
         } catch (std::exception e) {

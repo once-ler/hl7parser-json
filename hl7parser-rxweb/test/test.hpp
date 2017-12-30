@@ -9,6 +9,8 @@
 #include "server.hpp"
 #include "hl7parser-rxweb/src/middleware/finalMiddleware.hpp"
 #include "hl7parser-rxweb/src/middleware/persistenceMiddleware.hpp"
+#include "hl7parser-rxweb/src/middleware/patientMiddleware.hpp"
+#include "hl7parser-rxweb/src/middleware/observationMiddleware.hpp"
 #include "hl7parser-rxweb/src/route/persistenceRoute.hpp"
 
 namespace hl7parserrxweb::test {
@@ -26,7 +28,9 @@ namespace hl7parserrxweb::test {
     };
 
     server.middlewares = {
-      hl7parserrxweb::middleware::persistenceMiddleware(server, environment, config_j)
+      hl7parserrxweb::middleware::persistenceMiddleware(server, environment, config_j),
+      hl7parserrxweb::middleware::patientMiddleware(server, environment, config_j),
+      hl7parserrxweb::middleware::observationMiddleware(server, environment, config_j)
     };
 
     std::thread server_thread([&server]() {
