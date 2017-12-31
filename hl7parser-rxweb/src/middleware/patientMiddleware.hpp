@@ -40,7 +40,7 @@ namespace hl7parserrxweb::middleware {
         // Persist patient object to mongo.
         try {
           Mongoclient client(uri, database, "patient");
-          auto b = client.events->makeBsonFromJson(patient_j);
+          auto b = client.makeBsonFromJson(patient_j);
           auto rc = client.upsertOne(b1->view(), pid_id);
           // Log?
         } catch (std::exception e) {

@@ -48,7 +48,7 @@ namespace hl7parserrxweb::middleware {
           auto nextTask = t;
           *(nextTask.data) = j;
           nextTask.type = streamType;
-          server.getSubject().subscriber().on_next(nextTask);
+          server.dispatch(nextTask);
           // More tasks to emit...          
         } catch(const SimpleWeb::system_error& e) {
           resp = {{ "response", e.what() }};
@@ -59,7 +59,7 @@ namespace hl7parserrxweb::middleware {
         auto cptask = t;
         *(cptask.data) = resp;
         cptask.type = "HL7ACK_RESPONSE";
-        server.getSubject().subscriber().on_next(cptask);
+        server.dispatch(cptask);
         
       }
     };
