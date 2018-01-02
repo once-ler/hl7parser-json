@@ -11,6 +11,13 @@ namespace hl7parserrxweb::test::fixtures {
         { "threads", 20 }
       }
     },
+    {
+      "universalConsent", {
+        { "processState", "Foo" },
+        { "store", "Epic" },
+        { "studyId", "foobar123" }
+      }
+    },
     { "mongo", {
         { "development", {
             { "uri", "" },
@@ -25,6 +32,33 @@ namespace hl7parserrxweb::test::fixtures {
         { "prod", {
             { "uri", "" },
             { "database", "" }
+          }
+        }
+      }
+    },
+    { "mssql", {
+        { "development", {
+            { "server", "" },
+            { "port", 1433  },
+            { "database", "" },
+            { "user", "" },
+            { "password", "" }
+          }
+        },
+        { "staging", {
+            { "server", "" },
+            { "port", 1433  },
+            { "database", "" },
+            { "user", "" },
+            { "password", "" }
+          }
+        },
+        { "prod", {
+            { "server", "" },
+            { "port", 1433  },
+            { "database", "" },
+            { "user", "" },
+            { "password", "" }
           }
         }
       }

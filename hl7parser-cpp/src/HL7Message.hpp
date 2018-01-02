@@ -16,7 +16,7 @@
 using namespace hl7parsercpp::util;
 
 namespace hl7parsercpp {
-  static string version = "0.3.7";
+  static string version = "0.3.8";
 
   class HL7Message {
     friend HL7Header;

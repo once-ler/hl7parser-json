@@ -62,6 +62,8 @@
                 "-I", "${workspaceRoot}/../Store-cpp/store.events/src",
                 "-I", "${workspaceRoot}/../Store-cpp/store.common/src",
                 "-I", "${workspaceRoot}/../Store-cpp/store.storage/src",
+                "-I", "${workspaceRoot}/../Store-cpp/store.storage.sqlserver/src",
+                "-I", "${workspaceRoot}/../tdspp",
                 "-I", "${workspaceRoot}",
                 "-L", "/usr/local/lib",
                 "-L", "/usr/lib/x86_64-linux-gnu",

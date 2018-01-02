@@ -23,8 +23,8 @@ namespace hl7parserrxweb::middleware {
       [](const rxweb::task<S>& t)->bool { return (t.type == "PERSIST_HL7MESSAGE"); },
       [&](const rxweb::task<S>& t) {
         auto config_pt = make_shared<json>(config_j);
-        auto uri = getPathValueFromJson(config_pt, "mongo", environment, "uri");
-        auto database = getPathValueFromJson(config_pt, "mongo", environment, "database");
+        auto uri = getPathValueFromJson<string>(config_pt, "mongo", environment, "uri");
+        auto database = getPathValueFromJson<string>(config_pt, "mongo", environment, "database");
         json resp;
         
         try {

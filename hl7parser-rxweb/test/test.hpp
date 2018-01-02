@@ -26,13 +26,17 @@ namespace hl7parserrxweb::test {
     server.routes = {
       hl7parserrxweb::route::persistenceRoute(server, config_j)
     };
-
+/*
     server.middlewares = {
       hl7parserrxweb::middleware::persistenceMiddleware(server, environment, config_j),
       hl7parserrxweb::middleware::patientMiddleware(server, environment, config_j),
       hl7parserrxweb::middleware::observationMiddleware(server, environment, config_j)
     };
-
+*/
+    server.middlewares = {
+      hl7parserrxweb::middleware::persistenceMiddleware(server, environment, config_j),
+      hl7parserrxweb::middleware::observationMiddleware(server, environment, config_j)
+    };
     std::thread server_thread([&server]() {
       server.start();
     });

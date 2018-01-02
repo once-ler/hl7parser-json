@@ -22,8 +22,8 @@ namespace hl7parserrxweb::middleware {
     regex isADT("^ADT", regex_constants::icase | regex_constants::ECMAScript);
 
     auto config_pt = make_shared<json>(config_j);
-    auto uri = getPathValueFromJson(config_pt, "mongo", environment, "uri");
-    auto database = getPathValueFromJson(config_pt, "mongo", environment, "database");
+    auto uri = getPathValueFromJson<string>(config_pt, "mongo", environment, "uri");
+    auto database = getPathValueFromJson<string>(config_pt, "mongo", environment, "database");
     
     return {
       [&isADT](const rxweb::task<S>& t) { return regex_match(t.type, isADT); },
@@ -41,7 +41,7 @@ namespace hl7parserrxweb::middleware {
         try {
           Mongoclient client(uri, database, "patient");
           auto b = client.makeBsonFromJson(patient_j);
-          auto rc = client.upsertOne(b1->view(), pid_id);
+          auto rc = client.upsertOne(b->view(), pid_id);
           // Log?
         } catch (std::exception e) {
           // Log
