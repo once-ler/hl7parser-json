@@ -16,3 +16,9 @@ $ make
 $ sudo make install
 $ sudo ldconfig
 ```
+
+Installation in RedHat:
+```bash
+$ sudo yum install qt-devel
+# Then same as above for Ubuntu
+```
