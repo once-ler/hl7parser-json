@@ -21,4 +21,6 @@ Installation in RedHat:
 ```bash
 $ sudo yum install qt-devel
 # Then same as above for Ubuntu
+# May need to create a symlink
+# sudo ln -s /usr/bin/qmake-qt4 /usr/bin/qmake
 ```
