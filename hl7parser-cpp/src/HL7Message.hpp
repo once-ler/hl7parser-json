@@ -142,5 +142,9 @@ namespace hl7parsercpp {
       return move(strings::concat(msg_type, string(":"), pid_id));
     }
 
+    HL7_Message* getMessage() {
+      return &message;
+    }
+
   };
 }

@@ -23,7 +23,7 @@
             "args": ["-std=c++14", "-g", "-Wall", "-fno-stack-protector",
                 "-I", "/usr/local/include",
                 "-I", "${workspaceRoot}/../xml2json/include",
-                "-I", "${workspaceRoot}/../json/src",
+                "-I", "${workspaceRoot}/../json/single_include/nlohmann",
                 "-I", "${workspaceRoot}/hl7parser-json/include",
                 "-I", "${workspaceRoot}/hl7parser-cpp/src",
                 "-I", "${workspaceRoot}/hl7parser-rxweb/src",

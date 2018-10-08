@@ -149,7 +149,47 @@ int testLibParse() {
   }
 }
 
+int testRepeatableFields() {
+  const string hl7msg =
+      "MSH|^~\\&|SENDING_APPLICATION|SENDING_FACILITY|RECEIVING_APPLICATION|RECEIVING_FACILITY|20110613072049||ADT^A08|934579920110613072049|P|2.3||||\r"
+      "PID|1||135769||MOUSE^MICKEY^||19281118|M||W|123 Main St.^^Lake Buena Vista^FL^32830||(407)939-1289^^^theMainMouse@disney.com|||||1719|99999999|||N~U|||||||||||||||||\r";
+
+      // "PID|1||135769||MOUSE^MICKEY^||19281118|M||W~B~I|123 Main St.^^Lake Buena Vista^FL^32830||(407)939-1289^^^theMainMouse@disney.com|||||1719|99999999|||N~U|||||||||||||||||\r";
+
+  HL7Message hl7m{hl7msg};
+
+  HL7_Message* message = hl7m.getMessage();
+
+  // Component 4 -> Name, 9 -> Race
+  vector<string> vals;
+  HL7_Element* el;
+  HL7_Segment segment;
+  string m;
+  int idx = 0, pos = 9;
+  
+  hl7_message_segment(message, &segment, "PID", 0);
+
+  do {
+    el = hl7_segment_component(&segment, pos, idx);
+    if ((!(el->length ^ el->attr)) == 1) {
+      el = hl7_segment_repetition(&segment, pos, idx);
+      
+      if ((!(el->length ^ el->attr)) == 1)
+        break;
+    }
+
+    m = el->length > 0 ? string(el->value, el->length) : "";
+    
+    vals.push_back(move(m));
+
+    ++idx;
+  } while (true);
+
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
+  return testRepeatableFields();
   return testLibParse();
   testHeaderOnly(MESSAGE_DATA);
   testFile();

@@ -1,6 +1,8 @@
 {
   "files.associations": {
     "*.plsql": "plsql",
-    "initializer_list": "cpp"
+    "initializer_list": "cpp",
+    "system_error": "cpp",
+    "*.ipp": "cpp"
   }
 }
