@@ -4,40 +4,52 @@
 #include "json.hpp"
 
 #include "PhoneNumberHome.hpp"
+#include "PatientAddress.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
 namespace hl7parserJson::model::PID {
 
-  struct PatientIdentification {
+  class PatientIdentification {
     json hl7AsJson;  
-
+    shared_ptr<vector<PhoneNumberHome>> phoneNumberHome = nullptr;
+    shared_ptr<vector<PatientAddress>> patientAddress = nullptr;
+    
+public:
     PatientIdentification(const json& hl7AsJson_) : hl7AsJson(hl7AsJson_) {}
 
-    void phoneNumberHome() {
+    shared_ptr<vector<PhoneNumberHome>> getPhoneNumberHome() {
+      if (phoneNumberHome != nullptr)
+        return phoneNumberHome;
+
+      phoneNumberHome = make_shared<vector<PhoneNumberHome>>();
+
       auto j0 = hl7AsJson.at("PID");
       
       cout << j0.dump() << endl;
 
       if (!j0.is_array() || j0.size() < 13 || j0.at(12).is_null())
-        return;
+        return phoneNumberHome;
 
       auto j1 = j0.at(12).at("Repetition");
 
       cout << j1.dump() << endl;
 
-      // vector<vector<string>> v;
-
       for (auto& el : j1.items()) {
-        auto c = el.value().at("Component");
+        json c;
+        auto b = el.value();
+        if (b.is_object())
+          c = b.at("Component");
+        else
+          c = b;
 
         if (!c.is_array())
           continue;
 
         size_t len = c.size();
         PhoneNumberHome ph;
-        for (int i = 0; i < len; i++) {
+        for (size_t i = 0; i < len; i++) {
           auto v = c.at(i).is_null() ? "" : c.at(i).get<string>();
           switch (i) {
             case 0:
@@ -72,15 +84,95 @@ namespace hl7parserJson::model::PID {
           }
         }
 
+        phoneNumberHome->push_back(ph);
         
-        std::cout << el.key() << " : " << c.dump() << "\n";
-        // vector<string> v1 = c.at("Component");
-        // v.push_back(v1);
+        // std::cout << el.key() << " : " << c.dump() << "\n";
       }
 
+      return phoneNumberHome;
     }
 
-  // private:
+    shared_ptr<vector<PatientAddress>> getPatientAddress() {
+      if (patientAddress != nullptr)
+        return patientAddress;
+
+      patientAddress = make_shared<vector<PatientAddress>>();
+
+      auto j0 = hl7AsJson.at("PID");
+      
+      if (!j0.is_array() || j0.size() < 11 || j0.at(10).is_null())
+        return patientAddress;
+
+      auto j1 = j0.at(10).at("Repetition");
+
+      cout << j1.dump() << endl;
+
+      for (auto& el : j1.items()) {
+        json c;
+        auto b = el.value();
+        if (b.is_object())
+          c = b.at("Component");
+        else
+          c = b;
+
+        if (!c.is_array())
+          continue;
+
+        size_t len = c.size();
+        PatientAddress pa;
+        for (size_t i = 0; i < len; i++) {
+          auto v = c.at(i).is_null() ? "" : c.at(i).get<string>();
+          switch (i) {
+            case 0:
+              pa._1_StreetAddress = v;
+            break;
+            case 1:
+              pa._2_OtherDesignation = v;
+            break;
+            case 2:
+              pa._3_City = v;
+            break;
+            case 3:
+              pa._4_StateOrProvince = v;
+            break;
+            case 4:
+              pa._5_ZipOrPostalCode = v;
+            break;
+            case 5:
+              pa._6_Country = v;
+            break;
+            case 6:
+              pa._7_AddressType = v;
+            break;
+            case 7:
+              pa._8_OtherGeographicDesignation = v;
+            break;
+            case 8:
+              pa._9_CountyParishCode = v;
+            break;
+            case 9:
+              pa._10_CensusTract = v;
+            break;
+            case 10:
+              pa._11_AddressRepresentationCode = v;
+            break;
+            case 11:
+              pa._12_AddressValidityRange = v;
+            break;
+            default:
+            break;
+          }
+        }
+
+        patientAddress->push_back(pa);
+        
+        // std::cout << el.key() << " : " << c.dump() << "\n";
+      }
+
+      return patientAddress;
+    }
+
+  private:
     
 
   };
