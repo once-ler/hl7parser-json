@@ -3,6 +3,8 @@
     "*.plsql": "plsql",
     "initializer_list": "cpp",
     "system_error": "cpp",
-    "*.ipp": "cpp"
+    "*.ipp": "cpp",
+    "thread": "cpp",
+    "typeinfo": "cpp"
   }
 }
