@@ -28,16 +28,16 @@ public:
 
       phoneNumberHome = make_shared<vector<PhoneNumberHome>>();
 
-      auto j0 = hl7AsJson.at("PID");
+      auto j0 = hl7AsJson.at("PID").at(0);
       
-      cout << j0.dump() << endl;
+      // cout << j0.dump() << endl;
 
       if (!j0.is_array() || j0.size() < 13 || j0.at(12).is_null())
         return phoneNumberHome;
 
       auto j1 = j0.at(12).at("Repetition");
 
-      cout << j1.dump() << endl;
+      // cout << j1.dump() << endl;
 
       for (auto& el : j1.items()) {
         json c;
@@ -101,14 +101,14 @@ public:
 
       patientAddress = make_shared<vector<PatientAddress>>();
 
-      auto j0 = hl7AsJson.at("PID");
+      auto j0 = hl7AsJson.at("PID").at(0);
       
       if (!j0.is_array() || j0.size() < 11 || j0.at(10).is_null())
         return patientAddress;
 
       auto j1 = j0.at(10).at("Repetition");
 
-      cout << j1.dump() << endl;
+      // cout << j1.dump() << endl;
 
       for (auto& el : j1.items()) {
         json c;
@@ -181,7 +181,7 @@ public:
 
       patientName = make_shared<vector<PatientName>>();
 
-      auto j0 = hl7AsJson.at("PID");
+      auto j0 = hl7AsJson.at("PID").at(0);
       
       if (!j0.is_array() || j0.size() < 5 || j0.at(4).is_null())
         return patientName;

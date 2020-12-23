@@ -35,7 +35,8 @@ namespace hl7parserJson {
                 continue;
               string k = v.at(0).get<std::string>();
               v.erase(0);
-              hl7AsJson[k] = v;
+              // hl7AsJson[k] = v;
+              hl7AsJson[k].push_back(v);
           }
         } catch (const exception& e) {
           cout << e.what() << endl;
